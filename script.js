@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ★ピッカーの初期化 (MobileSelect.js) ---
-    // PC/スマホに関わらず常に初期化する
+    // PC/スマホに関わらず常に初期化を試みる
     let startPicker, targetPicker;
 
     // データ生成ヘルパー (0からmaxまでの文字列配列を作成)
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         callback: function(indexArr, data) {}
     };
 
-    // 出発用ピッカー初期化（常に実行）
+    // 出発用ピッカー初期化
     try {
         startPicker = new MobileSelect({
             ...pickerConfig,
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('MobileSelect init failed for start:', e);
     }
 
-    // 到着用ピッカー初期化（常に実行）
+    // 到着用ピッカー初期化
     try {
         targetPicker = new MobileSelect({
             ...pickerConfig,
@@ -117,36 +117,31 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // ヘルパー: PCとスマホ(ピッカー)の値をセットする関数
-    function setTimeBoth(timeNum, pcH, pcM, pcS, picker) {
-        // その瞬間の画面幅で判定
-        const isMobile = window.innerWidth <= 480;
+    // ヘルパー: PC用入力欄とピッカーの両方の値を更新する関数【修正】
+    function updateAllInputs(timeNum, pcH, pcM, pcS, picker) {
+        // 1. PC用入力欄を更新
+        pcH.value = padZero(timeNum.h);
+        pcM.value = padZero(timeNum.m);
+        pcS.value = padZero(timeNum.s);
 
-        if (isMobile) {
-            // スマホの場合：ピッカーが存在すれば更新
-            if (picker && typeof picker.locatePosition === 'function') {
-                picker.locatePosition(0, timeNum.h);
-                picker.locatePosition(1, timeNum.m);
-                picker.locatePosition(2, timeNum.s);
-            }
-        } else {
-            // PCの場合：input要素を更新
-            pcH.value = padZero(timeNum.h);
-            pcM.value = padZero(timeNum.m);
-            pcS.value = padZero(timeNum.s);
+        // 2. ピッカーが存在すればピッカーの位置も合わせる
+        if (picker && typeof picker.locatePosition === 'function') {
+            picker.locatePosition(0, timeNum.h);
+            picker.locatePosition(1, timeNum.m);
+            picker.locatePosition(2, timeNum.s);
         }
     }
 
     // 現在時刻セット (出発)
     setNowStartBtn.addEventListener('click', () => {
         const t = getNowTimeNum();
-        setTimeBoth(t, startHH, startMM, startSS, startPicker);
+        updateAllInputs(t, startHH, startMM, startSS, startPicker);
     });
 
     // 現在時刻セット (到着)
     setNowTargetBtn.addEventListener('click', () => {
         const t = getNowTimeNum();
-        setTimeBoth(t, targetHH, targetMM, targetSS, targetPicker);
+        updateAllInputs(t, targetHH, targetMM, targetSS, targetPicker);
     });
 
     function updateCurrentTime() {
@@ -240,6 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 時刻取得エラーのチェック
         if (!timeVal) {
+            // スマホでピッカーが動いていない場合もここに来る
             errorMessages.push(currentMode === 'mode-start' ? '出発予定時刻を正しく入力してください。' : '目標到着時刻を正しく入力してください。');
         }
 
