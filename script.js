@@ -32,9 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- ★ピッカーの初期化 (MobileSelect.js) ---
-    // 初期値は null にしておく
-    let startPicker = null;
-    let targetPicker = null;
+    // PC/スマホに関わらず常に初期化する
+    let startPicker, targetPicker;
 
     // データ生成ヘルパー (0からmaxまでの文字列配列を作成)
     function generateData(max) {
@@ -60,30 +59,25 @@ document.addEventListener('DOMContentLoaded', () => {
         callback: function(indexArr, data) {}
     };
 
-    // ★重要★ スマホ画面の幅の時だけピッカーを初期化する関数
-    function initPickers() {
-        // CSSのメディアクエリに合わせて480px以下をスマホと判定
-        if (window.innerWidth <= 480) {
-            // まだ初期化されていない場合のみ実行（二重初期化防止）
-            if (!startPicker) {
-                startPicker = new MobileSelect({
-                    ...pickerConfig,
-                    trigger: '#mobile-start-trigger', 
-                });
-            }
-            if (!targetPicker) {
-                targetPicker = new MobileSelect({
-                    ...pickerConfig,
-                    trigger: '#mobile-target-trigger',
-                });
-            }
-        }
+    // 出発用ピッカー初期化（常に実行）
+    try {
+        startPicker = new MobileSelect({
+            ...pickerConfig,
+            trigger: '#mobile-start-trigger', 
+        });
+    } catch (e) {
+        console.warn('MobileSelect init failed for start:', e);
     }
-    
-    // ページ読み込み時に実行
-    initPickers();
-    // 画面サイズが変わった時にも念のため実行（PCでウィンドウを狭めた場合など）
-    window.addEventListener('resize', initPickers);
+
+    // 到着用ピッカー初期化（常に実行）
+    try {
+        targetPicker = new MobileSelect({
+            ...pickerConfig,
+            trigger: '#mobile-target-trigger',
+        });
+    } catch (e) {
+        console.warn('MobileSelect init failed for target:', e);
+    }
 
 
     // --- イベントリスナー ---
@@ -125,11 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ヘルパー: PCとスマホ(ピッカー)の値をセットする関数
     function setTimeBoth(timeNum, pcH, pcM, pcS, picker) {
+        // その瞬間の画面幅で判定
         const isMobile = window.innerWidth <= 480;
 
         if (isMobile) {
             // スマホの場合：ピッカーが存在すれば更新
-            if (picker) {
+            if (picker && typeof picker.locatePosition === 'function') {
                 picker.locatePosition(0, timeNum.h);
                 picker.locatePosition(1, timeNum.m);
                 picker.locatePosition(2, timeNum.s);
@@ -178,12 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //---入力値を取得する関数 (PC/スマホ自動判定)---//
     function getTimeFromInputs(pcH, pcM, pcS, picker) {
+        // その瞬間の画面幅で判定
         const isMobile = window.innerWidth <= 480;
 
         if (isMobile) {
             // スマホ (ピッカーから取得)
-            // ★重要★ ピッカーが初期化されていない場合はエラー扱いとする
-            if (!picker) return null;
+            // ピッカーが正しく初期化されていない場合はエラー
+            if (!picker || typeof picker.getValue !== 'function') return null;
 
             const val = picker.getValue();
             if (!val || val.length !== 3) return null;
@@ -200,7 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const m = parseInt(pcM.value, 10);
             const s = parseInt(pcS.value, 10);
             if (isNaN(h) || isNaN(m) || isNaN(s)) return null;
-            // 念のため範囲チェック
             if (h < 0 || h > 23 || m < 0 || m > 59 || s < 0 || s > 59) return null;
             return { h, m, s };
         }
