@@ -285,24 +285,36 @@ button {
     transform: translateY(-2px);
 }
 
-/* エラーメッセージ */
+/* エラーメッセージの */
 .error-message {
-    background-color: #fff8f8;
-    border: 1px solid #e74c3c;
+    background-color: #fff5f5;
+    border: 2px solid #e74c3c;
     color: #c0392b;
-    padding: 15px 20px;
+    padding: 20px;
     border-radius: 8px;
-    margin-top: 10px;
+    margin-top: 15px;
     animation: fadeIn 0.3s ease-out;
+    box-shadow: 0 2px 10px rgba(231, 76, 60, 0.2);
 }
+
 .error-message h4 {
     margin-top: 0;
-    margin-bottom: 10px;
-    color: #c0392b;
+    margin-bottom: 15px;
+    color: #e74c3c;
+    font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
+
 .error-message ul {
     margin: 0;
     padding-left: 20px;
+}
+
+.error-message li {
+    margin-bottom: 8px;
+    font-weight: bold;
 }
 
 /* --- チャット用コピー機能 --- */
