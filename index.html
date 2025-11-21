@@ -12,7 +12,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
     
-    </head>
+    <meta property="og:title" content="出発時刻計算機" />
+    <meta property="og:description" content="集結を何連もする時の集結主の出発時刻を計算するツールです。スマホではドラムロール式ピッカーで時刻入力が可能です。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://whiteoutsurvival-time.netlify.app" />
+    <meta property="og:image" content="https://whiteoutsurvival-time.netlify.app/image/image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+</head>
 
 <body>
 
@@ -42,8 +48,8 @@
                         <input type="number" id="start-ss" placeholder="秒" min="0" max="59">
                     </div>
 
-                    <div class="time-input-group mobile-view" style="display: none;">
-                        <input type="text" id="mobile-start-trigger" class="picker-trigger" placeholder="時刻を選択" readonly>
+                    <div class="time-input-group mobile-view">
+                        <input type="text" id="mobile-start-trigger" class="picker-trigger" placeholder="ここをタップして時刻を選択" readonly>
                     </div>
 
                     <button id="set-now-start-btn" class="small-btn">現在時刻</button>
@@ -63,8 +69,8 @@
                         <input type="number" id="target-ss" placeholder="秒" min="0" max="59">
                     </div>
 
-                    <div class="time-input-group mobile-view" style="display: none;">
-                        <input type="text" id="mobile-target-trigger" class="picker-trigger" placeholder="時刻を選択" readonly>
+                    <div class="time-input-group mobile-view">
+                        <input type="text" id="mobile-target-trigger" class="picker-trigger" placeholder="ここをタップして時刻を選択" readonly>
                     </div>
 
                     <button id="set-now-target-btn" class="small-btn">現在時刻</button>
@@ -86,15 +92,20 @@
 
 
         <h2>集結主リスト</h2>
-        <div class="participant-header">
+        <div class="participant-header pc-view">
             <div>名前</div>
             <div>目的地までの秒数</div>
             <div class="label-remove">削除</div>
         </div>
+
         <div id="participants-list"></div>
+        
         <button id="add-participant-btn">＋ 集結主を追加</button>
+        
         <hr>
+        
         <button id="calculate-btn">計算する！</button>
+        
         <h2>計算結果</h2>
         <div id="results"></div>
     </div>
