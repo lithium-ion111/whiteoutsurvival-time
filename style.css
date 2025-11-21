@@ -140,13 +140,17 @@ input:disabled {
     text-align: center;
     color: #00796B;
     font-weight: 700;
+    /* プレースホルダーの色 */
+    &::placeholder {
+        color: #aabdbb;
+        font-weight: normal;
+    }
 }
 /* readonlyだがフォーカス時のスタイルは適用する */
 .picker-trigger:focus {
     border-color: #00796B;
     box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
 }
-
 
 /* --- 時刻入力エリアのレイアウト --- */
 .time-input-container {
@@ -166,8 +170,6 @@ input:disabled {
     text-align: center;
 }
 
-/* Select関連のスタイルは削除 */
-
 /* 小さいボタン (現在時刻セット用) */
 .small-btn {
     padding: 10px 15px;
@@ -185,7 +187,6 @@ input:disabled {
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
-
 
 /* --- グローバル設定 --- */
 .global-settings {
@@ -346,33 +347,57 @@ button {
     padding-left: 20px;
 }
 
-/* ---スマホ表示の切り替え (480px以下)--- */
+/* =========================================
+   レスポンシブ表示切り替え (PC / スマホ)
+========================================= */
+
+/* デフォルト（PC幅 481px以上）の設定 */
+/* スマホ用の要素を隠す */
+.mobile-view {
+    display: none;
+}
+/* PC用の要素を表示（明示的に） */
+.pc-view {
+    display: flex; /* または block など要素に合わせて */
+}
+
+
+/* スマホ幅 (480px以下) の設定 */
 @media (max-width: 480px) {
-    /* PC用入力を非表示 */
+    /* PC用要素を非表示にする */
     .pc-view {
         display: none !important;
     }
-    /* スマホ用入力を表示 */
+    /* スマホ用要素を表示する */
     .mobile-view {
         display: flex !important;
+        width: 100%; /* 幅を一杯に */
     }
 
-    /* レイアウト調整 */
-    .participant-header {
-        display: none; 
-    }
+    /* 参加者リストのレイアウト調整 */
     .participant-row {
-        grid-template-columns: 1fr; 
+        grid-template-columns: 1fr auto; /* 名前入力と削除ボタン */
         grid-template-areas: 
-            "name"
-            "time"
-            "remove"; 
-        gap: 12px;
+            "name remove"
+            "time time"; /* 時間入力は下の段に全幅で */
+        gap: 10px;
+    }
+    .participant-row .name {
+        grid-area: name;
+    }
+    .participant-row .travel-time {
+        grid-area: time;
     }
     .participant-row .remove-btn {
-        width: 100%;
+        grid-area: remove;
+        width: auto; /* 幅を自動に */
+        padding: 5px 15px;
+        height: auto;
+        align-self: start; /* 上揃え */
     }
+    
+    /* 時刻入力エリアの調整 */
     .time-input-container {
-        flex-direction: row; 
+        /* 必要に応じて調整 */
     }
 }
