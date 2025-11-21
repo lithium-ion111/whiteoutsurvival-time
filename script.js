@@ -1,264 +1,247 @@
-// DOMが読み込まれたら実行
 document.addEventListener('DOMContentLoaded', () => {
-// --- 要素の取得 ---
-const addBtn = document.getElementById('add-participant-btn');
-const calcBtn = document.getElementById('calculate-btn');
-const participantsList = document.getElementById('participants-list');
-const resultsDiv = document.getElementById('results');
-const utcTimeDisplay = document.getElementById('current-time-display');
-const tabBtns = document.querySelectorAll('.tab-btn');
-const tabContents = document.querySelectorAll('.tab-content');
-let currentMode = 'mode-start';
+    // --- 要素の取得 ---
+    const addBtn = document.getElementById('add-participant-btn');
+    const calcBtn = document.getElementById('calculate-btn');
+    const participantsList = document.getElementById('participants-list');
+    const resultsDiv = document.getElementById('results');
+    const utcTimeDisplay = document.getElementById('current-time-display');
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    let currentMode = 'mode-start';
 
-// -- 出発時刻用要素 --
-const startHH = document.getElementById('start-hh');
-const startMM = document.getElementById('start-mm');
-const startSS = document.getElementById('start-ss');
-const mStartHH = document.getElementById('mobile-start-hh');
-const mStartMM = document.getElementById('mobile-start-mm');
-const mStartSS = document.getElementById('mobile-start-ss');
-const setNowStartBtn = document.getElementById('set-now-start-btn');
-// -- 到着時刻用要素 --
-const targetHH = document.getElementById('target-hh');
-const targetMM = document.getElementById('target-mm');
-const targetSS = document.getElementById('target-ss');
-const mTargetHH = document.getElementById('mobile-target-hh');
-const mTargetMM = document.getElementById('mobile-target-mm');
-const mTargetSS = document.getElementById('mobile-target-ss');
-const setNowTargetBtn = document.getElementById('set-now-target-btn');
+    // -- 入力要素 --
+    const startInputs = { h: 'start-hh', m: 'start-mm', s: 'start-ss', mh: 'mobile-start-hh', mm: 'mobile-start-mm', ms: 'mobile-start-ss' };
+    const targetInputs = { h: 'target-hh', m: 'target-mm', s: 'target-ss', mh: 'mobile-target-hh', mm: 'mobile-target-mm', ms: 'mobile-target-ss' };
+    const rallyTimeButtons = document.getElementById('rally-time-buttons');
 
-const rallyTimeButtons = document.getElementById('rally-time-buttons');
+    // --- 0埋めヘルパー ---
+    const padZero = (num) => num.toString().padStart(2, '0');
 
-// --- 0埋めヘルパー ---
-function padZero(num) {
-return num.toString().padStart(2, '0');
-}
+    // --- 初期化: セレクトボックス生成 ---
+    function initSelectOptions() {
+        const populate = (id, max) => {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.innerHTML = '';
+            for (let i = 0; i <= max; i++) {
+                const opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = padZero(i);
+                el.appendChild(opt);
+            }
+        };
+        ['mobile-start', 'mobile-target'].forEach(p => {
+            populate(`${p}-hh`, 23);
+            populate(`${p}-mm`, 59);
+            populate(`${p}-ss`, 59);
+        });
+    }
+    initSelectOptions();
 
-// --- ★初期化: セレクトボックスの選択肢生成 ---
-function initSelectOptions() {
-// 選択肢を追加するヘルパー
-const populate = (elem, max) => {
-elem.innerHTML = ''; // 一旦クリア
-for (let i = 0; i <= max; i++) {
-const opt = document.createElement('option');
-opt.value = i; // 値は数値で保持
-opt.textContent = padZero(i); // 表示は0埋め
-elem.appendChild(opt);
-}
-};
+    // --- イベント: タブ切り替え ---
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            btn.classList.add('active');
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+            currentMode = tabId;
+            resultsDiv.innerHTML = '';
+        });
+    });
 
-// 時(0-23), 分(0-59), 秒(0-59)
-populate(mStartHH, 23);
-populate(mStartMM, 59);
-populate(mStartSS, 59);
+    // --- イベント: 集結時間選択 ---
+    rallyTimeButtons.addEventListener('click', (e) => {
+        if (e.target.classList.contains('rally-time-btn')) {
+            rallyTimeButtons.querySelectorAll('.rally-time-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+        }
+    });
 
-populate(mTargetHH, 23);
-populate(mTargetMM, 59);
-populate(mTargetSS, 59);
-}
-initSelectOptions();
+    // --- 時刻同期関連 ---
+    function getNowTime() {
+        const now = new Date();
+        return { h: now.getUTCHours(), m: now.getUTCMinutes(), s: now.getUTCSeconds() };
+    }
 
-// --- イベントリスナー ---
-addBtn.addEventListener('click', addParticipantRow);
-calcBtn.addEventListener('click', calculateDepartures);
+    function setTimeInputs(prefix, t) {
+        document.getElementById(`${prefix}-hh`).value = t.h;
+        document.getElementById(`${prefix}-mm`).value = t.m;
+        document.getElementById(`${prefix}-ss`).value = t.s;
+        document.getElementById(`mobile-${prefix}-hh`).value = t.h;
+        document.getElementById(`mobile-${prefix}-mm`).value = t.m;
+        document.getElementById(`mobile-${prefix}-ss`).value = t.s;
+    }
 
-// タブ切り替え
-tabBtns.forEach(btn => {
-btn.addEventListener('click', () => {
-tabBtns.forEach(b => b.classList.remove('active'));
-tabContents.forEach(c => c.classList.remove('active'));
-btn.classList.add('active');
-const tabId = btn.getAttribute('data-tab');
-document.getElementById(tabId).classList.add('active');
-currentMode = tabId;
-resultsDiv.innerHTML = '';
-});
-});
+    document.getElementById('set-now-start-btn').addEventListener('click', () => setTimeInputs('start', getNowTime()));
+    document.getElementById('set-now-target-btn').addEventListener('click', () => setTimeInputs('target', getNowTime()));
 
-// 集結時間ボタン
-rallyTimeButtons.addEventListener('click', (e) => {
-if (e.target.classList.contains('rally-time-btn')) {
-rallyTimeButtons.querySelectorAll('.rally-time-btn').forEach(btn => {
-btn.classList.remove('active');
-});
-e.target.classList.add('active');
-}
-});
+    // 時計更新
+    setInterval(() => {
+        const now = new Date();
+        utcTimeDisplay.textContent = `現在時刻(UTC): ${now.toLocaleTimeString('ja-JP', { timeZone: 'UTC', hour12: false })}`;
+    }, 1000);
 
-// 現在時刻取得
-function getNowTime() {
-const now = new Date();
-return {
-h: padZero(now.getUTCHours()),
-m: padZero(now.getUTCMinutes()),
-s: padZero(now.getUTCSeconds())
-};
-}
+    // --- 参加者行の追加 ---
+    function addParticipantRow() {
+        const row = document.createElement('div');
+        row.className = 'participant-row';
+        row.innerHTML = `
+            <input type="text" placeholder="名前" class="name" style="grid-area: name;">
+            <input type="number" placeholder="行軍時間(秒)" class="travel-time" style="grid-area: time;">
+            <button class="remove-btn" style="grid-area: remove;">×</button>
+        `;
+        row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
+        participantsList.appendChild(row);
+    }
+    addBtn.addEventListener('click', addParticipantRow);
+    addParticipantRow();
 
-// ヘルパー: PCとスマホ両方に値をセット
-function setTimeBoth(val, pcElem, mobElem) {
-// 数値として扱うためにparseIntしてからセット
-const numVal = parseInt(val, 10);
-pcElem.value = numVal; // PC用 (input type="number")
-mobElem.value = numVal; // スマホ用 (select)
-}
+    // --- 入力取得 ---
+    function getTimeValue(ids) {
+        const isMobile = window.getComputedStyle(document.querySelector('.mobile-view')).display !== 'none';
+        const hId = isMobile ? ids.mh : ids.h;
+        const mId = isMobile ? ids.mm : ids.m;
+        const sId = isMobile ? ids.ms : ids.s;
 
-// 現在時刻セット (出発)
-setNowStartBtn.addEventListener('click', () => {
-const t = getNowTime();
-setTimeBoth(t.h, startHH, mStartHH);
-setTimeBoth(t.m, startMM, mStartMM);
-setTimeBoth(t.s, startSS, mStartSS);
-});
+        const h = parseInt(document.getElementById(hId).value, 10);
+        const m = parseInt(document.getElementById(mId).value, 10);
+        const s = parseInt(document.getElementById(sId).value, 10);
 
-// 現在時刻セット (到着)
-setNowTargetBtn.addEventListener('click', () => {
-const t = getNowTime();
-setTimeBoth(t.h, targetHH, mTargetHH);
-setTimeBoth(t.m, targetMM, mTargetMM);
-setTimeBoth(t.s, targetSS, mTargetSS);
-});
+        if (isNaN(h) || isNaN(m) || isNaN(s)) return null;
+        return { h, m, s };
+    }
 
-function updateCurrentTime() {
-const now = new Date();
-const utcTimeString = now.toLocaleTimeString('ja-JP', { timeZone: 'UTC', hour12: false });
-if (utcTimeDisplay) utcTimeDisplay.textContent = `現在時刻(UTC): ${utcTimeString}`;
-}
-setInterval(updateCurrentTime, 1000);
-updateCurrentTime();
+    // --- 時刻フォーマット関数 ---
+    function formatTimeLocal(date) { return date.toLocaleTimeString('ja-JP', { hour12: false }); }
+    function formatTimeUTC(date) { return date.toLocaleTimeString('ja-JP', { timeZone: 'UTC', hour12: false }); }
 
-function addParticipantRow() {
-const row = document.createElement('div');
-row.className = 'participant-row';
-row.innerHTML = `
-<input type="text" placeholder="名前" class="name" style="grid-area: name;">
-<input type="number" placeholder="目的地までの秒数" class="travel-time" style="grid-area: time;">
-<button class="remove-btn" style="grid-area: remove;">&times;</button>
-`;
-row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
-participantsList.appendChild(row);
-}
-// 初期1行
-addParticipantRow();
+    // --- 計算 & 結果表示 ---
+    calcBtn.addEventListener('click', () => {
+        resultsDiv.innerHTML = '';
+        const errors = [];
+        
+        // 1. 参加者取得
+        const rows = participantsList.querySelectorAll('.participant-row');
+        let participants = [];
+        let maxTravel = 0;
 
-//---入力値を取得する関数 (PC/スマホ自動判定)---//
-function getTimeFromInputs(pcH, pcM, pcS, mobH, mobM, mobS) {
-const isMobile = window.innerWidth <= 480;
+        rows.forEach((row, i) => {
+            const name = row.querySelector('.name').value.trim() || `参加者${i+1}`;
+            const time = parseInt(row.querySelector('.travel-time').value, 10);
+            if (isNaN(time) || time < 0) {
+                errors.push(`${name}の秒数が不正です`);
+            } else {
+                participants.push({ name, time });
+                if (time > maxTravel) maxTravel = time;
+            }
+        });
 
-if (isMobile) {
-// スマホ (Select)
-const h = parseInt(mobH.value, 10);
-const m = parseInt(mobM.value, 10);
-const s = parseInt(mobS.value, 10);
-if (isNaN(h) || isNaN(m) || isNaN(s)) return null;
-return { h, m, s };
-} else {
-// PC (Input)
-const h = parseInt(pcH.value, 10);
-const m = parseInt(pcM.value, 10);
-const s = parseInt(pcS.value, 10);
-if (isNaN(h) || isNaN(m) || isNaN(s)) return null;
-if (h < 0 || h > 23 || m < 0 || m > 59 || s < 0 || s > 59) return null;
-return { h, m, s };
-}
-}
+        if (participants.length === 0) errors.push("参加者がいません");
 
-function calculateDepartures() {
-let errorMessages = [];
-resultsDiv.innerHTML = '';
+        // 2. 時間設定取得
+        const rallySec = parseInt(document.querySelector('.rally-time-btn.active').dataset.value, 10);
+        const rallyMin = rallySec / 60;
+        const now = new Date();
+        let targetDate = new Date();
 
-const activeRallyButton = rallyTimeButtons.querySelector('.rally-time-btn.active');
-const rallyTimeSeconds = activeRallyButton ? parseInt(activeRallyButton.dataset.value, 10) : 60;
+        if (currentMode === 'mode-start') {
+            const val = getTimeValue(startInputs);
+            if (!val) {
+                errors.push("出発時刻を入力してください");
+            } else {
+                const baseStart = new Date(now);
+                baseStart.setUTCHours(val.h, val.m, val.s, 0);
+                targetDate = new Date(baseStart.getTime() + (maxTravel * 1000) + (rallySec * 1000));
+            }
+        } else {
+            const val = getTimeValue(targetInputs);
+            if (!val) {
+                errors.push("到着時刻を入力してください");
+            } else {
+                targetDate = new Date(now);
+                targetDate.setUTCHours(val.h, val.m, val.s, 0);
+            }
+        }
 
-const participants = [];
-const rows = participantsList.querySelectorAll('.participant-row');
-let maxTravelTime = -1;
+        if (errors.length > 0) {
+            resultsDiv.innerHTML = `<div class="error-message"><h4>エラー</h4><ul>${errors.map(e=>`<li>${e}</li>`).join('')}</ul></div>`;
+            return;
+        }
 
-if (rows.length === 0) errorMessages.push('参加者が1人も追加されていません。');
+        // 3. 計算とソート（出発が早い順）
+        const calculatedList = participants.map(p => {
+            const depTime = new Date(targetDate.getTime() - (rallySec * 1000) - (p.time * 1000));
+            return {
+                name: p.name,
+                time: p.time,
+                depTime: depTime
+            };
+        });
 
-rows.forEach((row, index) => {
-const name = row.querySelector('.name').value.trim() || `参加者 ${index + 1}`;
-const travelTime = parseInt(row.querySelector('.travel-time').value, 10);
-if (isNaN(travelTime) || travelTime < 0) {
-errorMessages.push(`参加者 ${name}: 秒数(0以上) が無効です。`);
-} else {
-if (travelTime > maxTravelTime) maxTravelTime = travelTime;
-participants.push({ name, travelTime });
-}
-});
-if (maxTravelTime === -1 && rows.length > 0) errorMessages.push('有効な移動時間の参加者がいません。');
+        // 出発時刻で昇順ソート (早い時間が先)
+        calculatedList.sort((a, b) => a.depTime - b.depTime);
 
-let targetArrivalTime = null;
-const now = new Date();
+        // 4. テキスト生成とリスト生成
+        // チャット用（UTCのみ）
+        let chatText = `到着: ${formatTimeUTC(targetDate)} (UTC)\n集結: ${rallyMin}分\n----------------\n【出発時刻一覧】\n`;
+        
+        // 表示用リスト（詳細形式）
+        let listHTML = `
+        <p style="font-size: 0.9em; color: #555; background: #f8f8f8; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
+            全員の目標到着時刻: <strong>${formatTimeUTC(targetDate)}</strong> (JST: ${formatTimeLocal(targetDate)})
+        </p>
+        <ul>
+        `;
 
-if (currentMode === 'mode-start') {
-// 出発時刻指定
-const timeVal = getTimeFromInputs(startHH, startMM, startSS, mStartHH, mStartMM, mStartSS);
-if (!timeVal) {
-errorMessages.push('出発予定時刻を正しく入力してください。');
-} else {
-const baseDepartureTime = new Date(now.getTime());
-baseDepartureTime.setUTCHours(timeVal.h, timeVal.m, timeVal.s, 0);
-if (baseDepartureTime.getTime() < now.getTime()) {
-errorMessages.push('出発予定時刻が現在時刻より過去です。未来の時刻を入力してください。');
-} else {
-targetArrivalTime = new Date(baseDepartureTime.getTime() + (maxTravelTime * 1000) + (rallyTimeSeconds * 1000));
-}
-}
-} else {
-// 到着時刻指定
-const timeVal = getTimeFromInputs(targetHH, targetMM, targetSS, mTargetHH, mTargetMM, mTargetSS);
-if (!timeVal) {
-errorMessages.push('目標到着時刻を正しく入力してください。');
-} else {
-targetArrivalTime = new Date(now.getTime());
-targetArrivalTime.setUTCHours(timeVal.h, timeVal.m, timeVal.s, 0);
-if (targetArrivalTime.getTime() < now.getTime()) {
-errorMessages.push('目標到着時刻が現在時刻より過去です。未来の時刻を入力してください。');
-}
-}
-}
+        calculatedList.forEach((p, index) => {
+            // チャット用テキスト追加
+            chatText += `${p.name}  ${formatTimeUTC(p.depTime)}\n`;
 
-if (errorMessages.length > 0) { showErrors(errorMessages); return; }
+            // 表示用リスト追加
+            listHTML += `
+            <li>
+                <strong>${index + 1}. ${p.name}</strong> <br>
+                出発すべき時刻: <strong>${formatTimeUTC(p.depTime)}</strong> (JST: ${formatTimeLocal(p.depTime)})
+            </li>
+            `;
+        });
+        listHTML += '</ul>';
 
-const departureList = [];
-for (let i = 0; i < participants.length; i++) {
-const p = participants[i];
-const targetDepartureTime = new Date(targetArrivalTime.getTime() - (rallyTimeSeconds * 1000) - p.travelTime * 1000);
-if (targetDepartureTime.getTime() < now.getTime()) {
-errorMessages.push(`「${p.name}」の出発時刻が過去になってしまいます。間に合いません。`);
-}
-departureList.push({ name: p.name, departureTime: targetDepartureTime });
-}
+        // 5. 描画（リストを先に表示し、その下にチャットコピー機能）
+        const container = document.createElement('div');
+        
+        // チャットコピーエリア
+        const chatAreaHTML = `
+            <div class="copy-section">
+                <hr>
+                <div class="result-actions">
+                    <button id="copy-chat-btn" class="copy-btn">📋 チャット用にコピー</button>
+                    <span id="copy-msg" class="copy-msg">コピーしました!</span>
+                </div>
+                <textarea id="chat-preview" class="chat-preview" readonly>${chatText}</textarea>
+            </div>
+        `;
 
-if (errorMessages.length > 0) { showErrors(errorMessages); return; }
-departureList.sort((a, b) => a.departureTime - b.departureTime);
+        // リスト(listHTML) + コピーエリア(chatAreaHTML) の順で結合
+        container.innerHTML = listHTML + chatAreaHTML;
+        resultsDiv.appendChild(container);
 
-let resultsHTML = `
-<p style="font-size: 0.9em; color: #555; background: #f8f8f8; padding: 10px; border-radius: 6px;">
-全員の目標到着時刻: <strong>${formatTimeUTC(targetArrivalTime)}</strong> (JST: ${formatTimeLocal(targetArrivalTime)})
-</p>
-<ul>
-`;
-departureList.forEach((p, index) => {
-resultsHTML += `
-<li>
-<strong>${index + 1}. ${p.name}</strong> <br>
-出発すべき時刻: <strong>${formatTimeUTC(p.departureTime)}</strong> (JST: ${formatTimeLocal(p.departureTime)})
-</li>
-`;
-});
-resultsHTML += '</ul>';
-resultsDiv.innerHTML = resultsHTML;
-}
+        // 6. コピーボタン動作
+        const copyBtn = document.getElementById('copy-chat-btn');
+        const copyMsg = document.getElementById('copy-msg');
+        const previewArea = document.getElementById('chat-preview');
 
-function showErrors(messages) {
-let errorHTML = '<div class="error-message"><h4>入力・計算エラー</h4><ul>';
-messages.forEach(msg => { errorHTML += `<li>${msg}</li>`; });
-errorHTML += '</ul></div>';
-resultsDiv.innerHTML = errorHTML;
-}
-
-function formatTimeLocal(date) { return date.toLocaleTimeString('ja-JP', { hour12: false }); }
-function formatTimeUTC(date) { return date.toLocaleTimeString('ja-JP', { timeZone: 'UTC', hour12: false }); }
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(chatText).then(() => {
+                copyMsg.classList.add('show');
+                setTimeout(() => copyMsg.classList.remove('show'), 2000);
+                previewArea.select();
+            }).catch(() => {
+                alert('コピーに失敗しました');
+            });
+        });
+    });
 });
