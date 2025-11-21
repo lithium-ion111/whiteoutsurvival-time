@@ -1,382 +1,411 @@
-/* --- Google Font (Noto Sans JP) のインポート --- */
+@charset "UTF-8";
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap');
 
-/* --- アニメーションの定義 --- */
 @keyframes fadeIn {
-from { opacity: 0; transform: translateY(10px); }
-to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- 基本設定 --- */
 body {
-font-family: 'Noto Sans JP', sans-serif;
-background-color: #f4f7f6;
-display: flex;
-justify-content: center;
-align-items: flex-start;
-min-height: 100vh;
-margin: 0;
-padding: 20px;
-box-sizing: border-box;
+    font-family: 'Noto Sans JP', sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
-/* --- カードデザイン --- */
 .container {
-background-color: #ffffff;
-border-radius: 12px;
-box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-padding: 30px 35px;
-width: 100%;
-max-width: 600px;
-box-sizing: border-box;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+    padding: 30px 35px;
+    width: 100%;
+    max-width: 600px;
+    box-sizing: border-box;
 }
 
-/* --- 見出し --- */
 h1 {
-text-align: center;
-color: #00796B;
-margin-top: 0;
+    text-align: center;
+    color: #00796B;
+    margin-top: 0;
 }
 h2 {
-border-bottom: 2px solid #f0f0f0;
-padding-bottom: 8px;
-color: #333;
-margin-top: 30px;
-margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 8px;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 20px;
 }
 hr {
-border: none;
-border-top: 1px solid #eee;
-margin: 25px 0;
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 25px 0;
 }
 
-/* --- 設定ヘッダー --- */
 .settings-header {
-display: flex;
-justify-content: center;
-align-items: center;
-margin-bottom: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
 }
 .current-time {
-font-size: 1.1em;
-font-weight: 700;
-color: #333;
-background-color: #f8f8f8;
-padding: 8px 12px;
-border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #333;
+    background-color: #f8f8f8;
+    padding: 8px 12px;
+    border-radius: 8px;
 }
 
-/* --- タブデザイン --- */
+/* タブ */
 .tab-container {
-display: flex;
-border-bottom: 2px solid #eee;
-margin-bottom: 20px;
+    display: flex;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 20px;
 }
 .tab-btn {
-flex: 1;
-padding: 12px;
-background: none;
-border: none;
-border-bottom: 3px solid transparent;
-font-weight: 700;
-color: #888;
-cursor: pointer;
-transition: all 0.3s;
-font-size: 1em;
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 700;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1em;
 }
 .tab-btn:hover {
-color: #00796B;
-background-color: #f9f9f9;
+    color: #00796B;
+    background-color: #f9f9f9;
 }
 .tab-btn.active {
-color: #00796B;
-border-bottom: 3px solid #00796B;
+    color: #00796B;
+    border-bottom: 3px solid #00796B;
 }
 
-/* コンテンツ切り替え */
 .tab-content {
-display: none; /* デフォルトは非表示 */
-animation: fadeIn 0.3s ease-out;
+    display: none;
+    animation: fadeIn 0.3s ease-out;
 }
 .tab-content.active {
-display: block; /* activeがついたら表示 */
+    display: block;
 }
 
-/* --- フォーム部品 --- */
+/* フォーム部品 */
 label {
-font-weight: 700;
-font-size: 0.9em;
-color: #555;
-display: block;
-margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 0.9em;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
 }
 input[type="time"],
 input[type="text"],
 input[type="number"],
 select {
-width: 100%;
-padding: 12px;
-font-size: 1em;
-border: 1px solid #ddd;
-border-radius: 8px;
-box-sizing: border-box;
-transition: border-color 0.2s, box-shadow 0.2s;
-background-color: #fff;
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff;
 }
 input:focus, select:focus {
-outline: none;
-border-color: #00796B;
-box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
-}
-input:disabled {
-background-color: #f5f5f5;
-color: #999;
+    outline: none;
+    border-color: #00796B;
+    box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
 }
 
-/* --- 時刻入力エリアのレイアウト --- */
 .time-input-container {
-display: flex;
-align-items: center;
-gap: 10px;
-flex-wrap: wrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 .time-input-group {
-display: flex;
-align-items: center;
-gap: 5px;
-flex: 1;
-min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    min-width: 200px;
 }
 .time-input-group input {
-text-align: center;
+    text-align: center;
 }
 
-/* スマホ用セレクトボックスのスタイル */
 .select-wrapper {
-display: flex;
-align-items: center;
-gap: 4px;
-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
 }
 .time-select {
-flex: 1;
-padding: 10px 5px;
-text-align: center;
-font-size: 1.1em;
-color: #00796B;
-background-color: #f8fdfd;
-border: 1px solid #00796B;
-border-radius: 8px;
-text-align-last: center;
--webkit-appearance: none; /* iOSのデフォルトスタイルを消してカスタムしやすく */
-appearance: none;
+    flex: 1;
+    padding: 10px 5px;
+    text-align: center;
+    font-size: 1.1em;
+    color: #00796B;
+    background-color: #f8fdfd;
+    border: 1px solid #00796B;
+    border-radius: 8px;
+    text-align-last: center;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-/* 小さいボタン (現在時刻セット用) */
 .small-btn {
-padding: 10px 15px;
-font-size: 0.9em;
-background-color: #607D8B;
-color: white;
-border: none;
-border-radius: 8px;
-white-space: nowrap;
-cursor: pointer;
-transition: all 0.2s ease;
+    padding: 10px 15px;
+    font-size: 0.9em;
+    background-color: #607D8B;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 .small-btn:hover {
-background-color: #546E7A;
-transform: translateY(-1px);
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: #546E7A;
 }
 
-
-/* --- グローバル設定 --- */
 .global-settings {
-margin-bottom: 20px;
-display: grid;
-grid-template-columns: 1fr;
-gap: 15px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
 }
 
-/* --- ボタングループ --- */
+/* 集結時間ボタン */
 .button-group {
-display: flex;
-gap: 10px;
-margin-top: 5px;
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
 }
 .rally-time-btn {
-flex-grow: 1;
-padding: 10px;
-font-size: 0.95em;
-background-color: #f0f0f0;
-color: #555;
-border: 2px solid #ddd;
-font-weight: 700;
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 0.95em;
+    background-color: #f0f0f0;
+    color: #555;
+    border: 2px solid #ddd;
+    font-weight: 700;
 }
 .rally-time-btn:hover {
-background-color: #e9e9e9;
+    background-color: #e9e9e9;
 }
 .rally-time-btn.active {
-background-color: #e0f2f1;
-color: #00796B;
-border-color: #00796B;
-box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
+    background-color: #e0f2f1;
+    color: #00796B;
+    border-color: #00796B;
+    box-shadow: 0 0 5px rgba(0, 121, 107, 0.2);
 }
 
-/* --- 参加者リスト --- */
+/* 参加者リスト */
 .participant-header {
-display: grid;
-grid-template-columns: 1.5fr 2fr auto;
-grid-template-areas: "name time remove";
-gap: 10px;
-padding: 0 10px;
-margin-bottom: 5px;
-font-weight: 700;
-font-size: 0.9em;
-color: #555;
+    display: grid;
+    grid-template-columns: 1.5fr 2fr auto;
+    grid-template-areas: "name time remove";
+    gap: 10px;
+    padding: 0 10px;
+    margin-bottom: 5px;
+    font-weight: 700;
+    font-size: 0.9em;
+    color: #555;
 }
 .participant-header .label-remove {
-grid-area: remove;
-width: 44.8px;
-box-sizing: border-box;
+    grid-area: remove;
+    width: 44.8px;
+    box-sizing: border-box;
 }
 .participant-row {
-display: grid;
-grid-template-columns: 1.5fr 2fr auto;
-grid-template-areas: "name time remove";
-gap: 10px;
-align-items: center;
-margin-bottom: 10px;
-padding: 10px;
-border: 1px solid #eee;
-border-radius: 8px;
+    display: grid;
+    grid-template-columns: 1.5fr 2fr auto;
+    grid-template-areas: "name time remove";
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 8px;
 }
 .participant-row input {
-width: 100%;
-box-sizing: border-box;
-padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
 }
 .participant-row .remove-btn {
-grid-area: remove;
-}
-.remove-btn {
-background-color: #e74c3c;
-color: white;
-padding: 5px 12px;
-font-size: 1.2rem;
-line-height: 1.2;
+    grid-area: remove;
+    background-color: #e74c3c;
+    color: white;
+    padding: 5px 12px;
+    font-size: 1.2rem;
+    line-height: 1.2;
 }
 .remove-btn:hover {
-background-color: #c0392b;
+    background-color: #c0392b;
 }
 
-/* --- ボタン --- */
+/* 計算ボタン */
 button {
-cursor: pointer;
-padding: 10px 15px;
-border: none;
-border-radius: 8px;
-font-size: 1rem;
-font-weight: 700;
-transition: all 0.2s ease;
+    cursor: pointer;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
 }
 #calculate-btn {
-width: 100%;
-padding: 15px;
-background: linear-gradient(45deg, #00796B, #4DB6AC);
-color: white;
-font-size: 1.1em;
-margin: 10px 0;
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(45deg, #00796B, #4DB6AC);
+    color: white;
+    font-size: 1.1em;
+    margin: 10px 0;
 }
 #calculate-btn:hover {
-transform: translateY(-2px);
-box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 #add-participant-btn {
-width: 100%;
-background-color: transparent;
-color: #00796B;
-border: 2px solid #00796B;
+    width: 100%;
+    background-color: transparent;
+    color: #00796B;
+    border: 2px solid #00796B;
 }
 #add-participant-btn:hover {
-background-color: #f8fdfd;
-transform: translateY(-2px);
+    background-color: #f8fdfd;
+    transform: translateY(-2px);
 }
 
-/* --- 結果表示 --- */
-#results {
-margin-top: 10px;
-}
-#results ul {
-list-style-type: none;
-padding-left: 0;
-margin: 0;
-}
-#results li {
-background-color: #f8fdfd;
-padding: 15px;
-border-radius: 10px;
-border: 1px solid #e0f2f1;
-animation: fadeIn 0.3s ease-out;
-margin-bottom: 10px;
-line-height: 1.5;
-}
-#results li strong {
-font-size: 1.4em;
-font-weight: 700;
-color: #00796B;
-word-wrap: break-word;
-line-height: 1.2;
-}
-
-/* --- エラーメッセージ --- */
+/* エラーメッセージ */
 .error-message {
-background-color: #fff8f8;
-border: 1px solid #e74c3c;
-color: #c0392b;
-padding: 15px 20px;
-border-radius: 8px;
-margin-top: 10px;
-animation: fadeIn 0.3s ease-out;
+    background-color: #fff8f8;
+    border: 1px solid #e74c3c;
+    color: #c0392b;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-top: 10px;
+    animation: fadeIn 0.3s ease-out;
 }
 .error-message h4 {
-margin-top: 0;
-margin-bottom: 10px;
-color: #c0392b;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #c0392b;
 }
 .error-message ul {
-margin: 0;
-padding-left: 20px;
+    margin: 0;
+    padding-left: 20px;
 }
 
-/* ---スマホ表示の切り替え (480px以下)--- */
+/* --- チャット用コピー機能 --- */
+#results {
+    margin-top: 10px;
+}
+
+/* コピーエリアのレイアウト調整 */
+.copy-section {
+    margin-top: 20px;
+}
+
+.result-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.copy-btn {
+    background: #607D8B;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    flex: 1;
+}
+.copy-btn:hover {
+    background: #546E7A;
+}
+.copy-btn:active {
+    transform: translateY(2px);
+}
+.copy-msg {
+    font-size: 0.9em;
+    color: #2ecc71;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+.copy-msg.show {
+    opacity: 1;
+}
+.chat-preview {
+    width: 100%;
+    height: 120px;
+    background: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    resize: none;
+    margin-bottom: 15px;
+    color: #333;
+    display: block;
+    box-sizing: border-box;
+}
+.chat-preview:focus {
+    border-color: #00796B;
+    outline: none;
+    background: #fff;
+}
+
+/* --- 結果表示リスト --- */
+#results ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+#results li {
+    background-color: #f8fdfd;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #e0f2f1;
+    animation: fadeIn 0.3s ease-out;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+#results li strong {
+    font-size: 1.4em;
+    font-weight: 700;
+    color: #00796B;
+    word-wrap: break-word;
+    line-height: 1.2;
+}
+
+/* スマホ表示 */
 @media (max-width: 480px) {
-/* PC用入力を非表示 */
-.pc-view {
-display: none !important;
-}
-/* スマホ用入力を表示 */
-.mobile-view {
-display: flex !important;
-}
-
-/* レイアウト調整 */
-.participant-header {
-display: none;
-}
-.participant-row {
-grid-template-columns: 1fr;
-grid-template-areas:
-"name"
-"time"
-"remove";
-gap: 12px;
-}
-.participant-row .remove-btn {
-width: 100%;
-}
-.time-input-container {
-flex-direction: row;
-}
+    .pc-view { display: none !important; }
+    .mobile-view { display: flex !important; }
+    .participant-header { display: none; }
+    .participant-row {
+        grid-template-columns: 1fr;
+        grid-template-areas: "name" "time" "remove";
+        gap: 12px;
+    }
+    .participant-row .remove-btn { width: 100%; }
+    .time-input-container { flex-direction: row; }
 }
