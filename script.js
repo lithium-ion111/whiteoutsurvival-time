@@ -158,13 +158,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const inputStartTime = new Date(now);
                 inputStartTime.setUTCHours(val.h, val.m, val.s, 0);
 
-                // ★エラーチェック: 入力した出発時刻がすでに過去
+                // エラーチェック: 入力した出発時刻がすでに過去
                 // (数秒のズレは許容するため、現在時刻より1秒以上前ならエラーとみなす)
                 if (inputStartTime.getTime() < now.getTime() - 1000) {
                     errors.push(`入力された出発時刻(${formatTimeUTC(inputStartTime)})はすでに過ぎています。未来の時間を指定してください。`);
                 }
 
-                // 一番遠い人の出発 + 行軍 + 集結 = 着弾
+                // 一番遠い人の出発 + 行軍 + 集結 = 到着
                 targetDate = new Date(inputStartTime.getTime() + (maxTravel * 1000) + (rallySec * 1000));
             }
         } else {
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetDate = new Date(now);
                 targetDate.setUTCHours(val.h, val.m, val.s, 0);
 
-                // ★エラーチェック: 入力した到着時刻がすでに過去
+                // エラーチェック: 入力した到着時刻がすでに過去
                 if (targetDate.getTime() < now.getTime() - 1000) {
                     errors.push(`入力された目標到着時刻(${formatTimeUTC(targetDate)})はすでに過ぎています。未来の時間を指定してください。`);
                 }
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             });
 
-            // ★エラーチェック: 誰か一人でも出発時刻が過去になっていないか？
+            // エラーチェック: 誰か一人でも出発時刻が過去になっていないか？
             calculatedList.forEach(p => {
                 if (p.depTime.getTime() < now.getTime() - 1000) {
                     errors.push(`「${p.name}」は間に合いません！今すぐ出発しても到着時刻を過ぎてしまいます。(出発期限: ${formatTimeUTC(p.depTime)})`);
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 5. テキスト生成とリスト生成
         const rallyMinText = rallyMin;
-        let chatText = `【着弾: ${formatTimeUTC(targetDate)} (UTC)】\n集結: ${rallyMinText}分\n----------------\n`;
+        let chatText = `到着時刻: ${formatTimeUTC(targetDate)} (UTC)\n集結: ${rallyMinText}分\n----------------\n【出発時刻一覧】\n`;
         
         let listHTML = `
         <p style="font-size: 0.9em; color: #555; background: #f8f8f8; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         calculatedList.forEach((p, index) => {
-            chatText += `${p.name} @ ${formatTimeUTC(p.depTime)}\n`;
+            chatText += `${p.name}  ${formatTimeUTC(p.depTime)}\n`;
 
             listHTML += `
             <li>
