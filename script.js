@@ -122,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     calcBtn.addEventListener('click', () => {
         resultsDiv.innerHTML = '';
         const errors = [];
+        const now = new Date(); // 現在時刻(比較用)
         
         // 1. 参加者取得
         const rows = participantsList.querySelectorAll('.participant-row');
@@ -144,51 +145,78 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. 時間設定取得
         const rallySec = parseInt(document.querySelector('.rally-time-btn.active').dataset.value, 10);
         const rallyMin = rallySec / 60;
-        const now = new Date();
+        
         let targetDate = new Date();
 
+        // --- モード別計算 & 時刻妥当性チェック ---
         if (currentMode === 'mode-start') {
+            // 【出発基準】
             const val = getTimeValue(startInputs);
             if (!val) {
-                errors.push("出発時刻を入力してください");
+                errors.push("出発予定時刻を入力してください");
             } else {
-                const baseStart = new Date(now);
-                baseStart.setUTCHours(val.h, val.m, val.s, 0);
-                targetDate = new Date(baseStart.getTime() + (maxTravel * 1000) + (rallySec * 1000));
+                const inputStartTime = new Date(now);
+                inputStartTime.setUTCHours(val.h, val.m, val.s, 0);
+
+                // ★エラーチェック: 入力した出発時刻がすでに過去
+                // (数秒のズレは許容するため、現在時刻より1秒以上前ならエラーとみなす)
+                if (inputStartTime.getTime() < now.getTime() - 1000) {
+                    errors.push(`入力された出発時刻(${formatTimeUTC(inputStartTime)})はすでに過ぎています。未来の時間を指定してください。`);
+                }
+
+                // 一番遠い人の出発 + 行軍 + 集結 = 着弾
+                targetDate = new Date(inputStartTime.getTime() + (maxTravel * 1000) + (rallySec * 1000));
             }
         } else {
+            // 【到着基準】
             const val = getTimeValue(targetInputs);
             if (!val) {
-                errors.push("到着時刻を入力してください");
+                errors.push("目標到着時刻を入力してください");
             } else {
                 targetDate = new Date(now);
                 targetDate.setUTCHours(val.h, val.m, val.s, 0);
+
+                // ★エラーチェック: 入力した到着時刻がすでに過去
+                if (targetDate.getTime() < now.getTime() - 1000) {
+                    errors.push(`入力された目標到着時刻(${formatTimeUTC(targetDate)})はすでに過ぎています。未来の時間を指定してください。`);
+                }
             }
         }
 
+        // 3. 個別の出発時刻計算と「間に合うか」チェック
+        // まだエラーがない場合のみ計算を進める
+        let calculatedList = [];
+        if (errors.length === 0) {
+            calculatedList = participants.map(p => {
+                const depTime = new Date(targetDate.getTime() - (rallySec * 1000) - (p.time * 1000));
+                return {
+                    name: p.name,
+                    time: p.time,
+                    depTime: depTime
+                };
+            });
+
+            // ★エラーチェック: 誰か一人でも出発時刻が過去になっていないか？
+            calculatedList.forEach(p => {
+                if (p.depTime.getTime() < now.getTime() - 1000) {
+                    errors.push(`「${p.name}」は間に合いません！今すぐ出発しても到着時刻を過ぎてしまいます。(出発期限: ${formatTimeUTC(p.depTime)})`);
+                }
+            });
+        }
+
+        // エラーがあれば表示して終了
         if (errors.length > 0) {
-            resultsDiv.innerHTML = `<div class="error-message"><h4>エラー</h4><ul>${errors.map(e=>`<li>${e}</li>`).join('')}</ul></div>`;
+            resultsDiv.innerHTML = `<div class="error-message"><h4>⚠️ 入力・計算エラー</h4><ul>${errors.map(e=>`<li>${e}</li>`).join('')}</ul></div>`;
             return;
         }
 
-        // 3. 計算とソート（出発が早い順）
-        const calculatedList = participants.map(p => {
-            const depTime = new Date(targetDate.getTime() - (rallySec * 1000) - (p.time * 1000));
-            return {
-                name: p.name,
-                time: p.time,
-                depTime: depTime
-            };
-        });
-
-        // 出発時刻で昇順ソート (早い時間が先)
+        // 4. ソート（出発時刻が早い順 = 行軍時間が長い順）
         calculatedList.sort((a, b) => a.depTime - b.depTime);
 
-        // 4. テキスト生成とリスト生成
-        // チャット用（UTCのみ）
-        let chatText = `到着: ${formatTimeUTC(targetDate)} (UTC)\n集結: ${rallyMin}分\n----------------\n【出発時刻一覧】\n`;
+        // 5. テキスト生成とリスト生成
+        const rallyMinText = rallyMin;
+        let chatText = `【着弾: ${formatTimeUTC(targetDate)} (UTC)】\n集結: ${rallyMinText}分\n----------------\n`;
         
-        // 表示用リスト（詳細形式）
         let listHTML = `
         <p style="font-size: 0.9em; color: #555; background: #f8f8f8; padding: 10px; border-radius: 6px; margin-bottom: 15px;">
             全員の目標到着時刻: <strong>${formatTimeUTC(targetDate)}</strong> (JST: ${formatTimeLocal(targetDate)})
@@ -197,10 +225,8 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         calculatedList.forEach((p, index) => {
-            // チャット用テキスト追加
-            chatText += `${p.name}  ${formatTimeUTC(p.depTime)}\n`;
+            chatText += `${p.name} @ ${formatTimeUTC(p.depTime)}\n`;
 
-            // 表示用リスト追加
             listHTML += `
             <li>
                 <strong>${index + 1}. ${p.name}</strong> <br>
@@ -210,26 +236,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         listHTML += '</ul>';
 
-        // 5. 描画（リストを先に表示し、その下にチャットコピー機能）
+        // 6. 描画
         const container = document.createElement('div');
-        
-        // チャットコピーエリア
         const chatAreaHTML = `
             <div class="copy-section">
                 <hr>
                 <div class="result-actions">
-                    <button id="copy-chat-btn" class="copy-btn">📋 コピー</button>
+                    <button id="copy-chat-btn" class="copy-btn">📋 チャット用にコピー</button>
                     <span id="copy-msg" class="copy-msg">コピーしました!</span>
                 </div>
                 <textarea id="chat-preview" class="chat-preview" readonly>${chatText}</textarea>
             </div>
         `;
 
-        // リスト(listHTML) + コピーエリア(chatAreaHTML) の順で結合
         container.innerHTML = listHTML + chatAreaHTML;
         resultsDiv.appendChild(container);
 
-        // 6. コピーボタン動作
         const copyBtn = document.getElementById('copy-chat-btn');
         const copyMsg = document.getElementById('copy-msg');
         const previewArea = document.getElementById('chat-preview');
