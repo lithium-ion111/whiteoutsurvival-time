@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="copy-section">
                 <hr>
                 <div class="result-actions">
-                    <button id="copy-chat-btn" class="copy-btn">📋 チャット用にコピー</button>
+                    <button id="copy-chat-btn" class="copy-btn">📋 コピー</button>
                     <span id="copy-msg" class="copy-msg">コピーしました!</span>
                 </div>
                 <textarea id="chat-preview" class="chat-preview" readonly>${chatText}</textarea>
